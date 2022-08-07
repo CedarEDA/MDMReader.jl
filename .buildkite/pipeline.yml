@@ -1,0 +1,32 @@
+steps:
+  - label: "Test the package"
+    key: runtests
+    env:
+      GITHUB_SSH_KEY: ${GITHUB_SSH_KEY?}
+    plugins:
+      - staticfloat/ssh-agent:
+          keyvars:
+            - "GITHUB_SSH_KEY"
+      - JuliaCI/julia#v1:
+          version: 1.7
+      - staticfloat/sandbox#v1:
+          rootfs_url: "https://github.com/JuliaCI/rootfs-images/releases/download/v4.11/agent_linux.x86_64.tar.gz"
+          # The correct hash is this 8e25f6570d2ecb791148b8d886260feb56a67f5c; can't be used because of a bug
+          rootfs_treehash: "90dae2e86be1314f6ca49f955019b55b67c998f4"
+          workspaces:
+            # Include `/cache` so that `julia` install can properly cache its Julia downloads
+            - "/cache:/cache"
+            # Include `~/.ssh` so that we get the pre-filled `known_hosts` file
+            - "${HOME}/.ssh:/root/.ssh"
+      # Run tests
+      - JuliaCI/julia-test#v1:
+          use_ssh: true
+          extra_registries: https://github.com/JuliaComputing/JuliaSimRegistry
+
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 120
+    artifact_paths:
+      - "test/logs/*.pdf"
+
+    agents:
+      sandbox.jl: true
