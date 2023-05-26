@@ -130,7 +130,7 @@ mutable struct Lexer{B <: Union{AbstractVector{UInt8}, IO}}
     startmark::Int
 end
 
-create_lexer(buf, len, ) = Lexer(buf, len, Parsers.Options(; quoted=true, escapechar='\\', wh1 = 0x7f, wh2 = 0x7f   ), 1, 0)
+create_lexer(buf, len, ) = Lexer(buf, len, Parsers.Options(; quoted=true, escapechar='\\', delim=' ', wh1 = 0x7f, wh2 = 0x7f), 1, 0)
 function Base.seek(l::Lexer, pos)
     Parsers.fastseek!(l.buf, pos-1)
     l.pos = pos
